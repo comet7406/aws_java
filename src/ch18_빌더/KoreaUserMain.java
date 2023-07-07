@@ -12,6 +12,8 @@ public class KoreaUserMain {
 //				.name("정혜성")
 //				.email("aaa.@gmail.com")
 //				.build();
+		
+		System.out.println(koreaUser);
 //
 	}
 	

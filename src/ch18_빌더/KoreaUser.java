@@ -16,10 +16,10 @@ public class KoreaUser {
 	private String name;
 	private String email;
 
-//	public static KoreaUserBuilder builder() {
-//		return new KoreaUser.KoreaUserBuilder();
-//	}
-//	
+	public static KoreaUserBuilder builder() {
+		return new KoreaUserBuilder();
+	}
+	
 //	public static class KoreaUserBuilder {
 //		private int userId;
 //		private String username;
