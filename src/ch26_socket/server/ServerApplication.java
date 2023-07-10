@@ -13,6 +13,7 @@ public class ServerApplication {
 	public static ServerSocket serverSocket;
 	public static int port;
 	
+	
 	public static void main(String[] args) {
 		
 		Thread connectionThread = null;
@@ -52,8 +53,15 @@ public class ServerApplication {
 					connectionThread = new Thread(() -> {
 						try {
 							serverSocket = new ServerSocket(port);
+							
 							while(!Thread.interrupted()) {
 								Socket socket = serverSocket.accept();
+								ConnectedSocket connectedSocket = new ConnectedSocket(socket);
+								connectedSocket.start();
+								
+								ConnectedClientController.getInstance()
+								.getConnectedSockets().add(connectedSocket);
+								
 								System.out.println("접속!!");
 								System.out.println(socket.getInetAddress().getHostAddress());
 							}
