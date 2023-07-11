@@ -28,15 +28,4 @@ public class ComputerBuilder {
 		System.out.println("SSD 용량(GB):" + ssdSize);
 	}
 	
-	Computer computer = Computer.computerBuilder()
-						.cpuType("intel")
-						.ramSize(16)
-						.ssdSize(512)
-						.build();
-	public static void main(String[] args) {
-		
-	}
-	
-
-	
 }

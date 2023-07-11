@@ -11,21 +11,25 @@ public class SimpleGUIServer {
 	public static List<ConnectedSocket> connectedSocketList = new ArrayList<>();
 	
 	public static void main(String[] args) {
-		try {
-			ServerSocket serverSocket = new ServerSocket(8000);
-			System.out.println("[ 서버실행 ]");
-			
-			while(true) {
-				Socket socket = serverSocket.accept();
-				ConnectedSocket connectedSocket = new ConnectedSocket(socket);
-				connectedSocketList.add(connectedSocket);
-				connectedSocket.start();
+		Thread thread = new Thread( () -> {
+	 		try {
+				ServerSocket serverSocket = new ServerSocket(8000);
+				System.out.println("[ 서버실행 ]");
 				
+				while(true) {
+					Socket socket = serverSocket.accept();
+					System.out.println("접속");
+					ConnectedSocket connectedSocket = new ConnectedSocket(socket);
+					connectedSocket.start();
+					connectedSocketList.add(connectedSocket);				
+				}
+			
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+		});
+		thread.start();
 	
+	}
 }
