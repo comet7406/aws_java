@@ -14,8 +14,9 @@ public class ClientSender {
 	private static ClientSender instance;
 	
 	private ClientSender() {
-		gson =  new Gson();
+		gson = new Gson();
 	}
+	
 	public static ClientSender getInstance() {
 		if(instance == null) {
 			instance = new ClientSender();
@@ -33,5 +34,5 @@ public class ClientSender {
 			e.printStackTrace();
 		}
 	}
-
+	
 }
