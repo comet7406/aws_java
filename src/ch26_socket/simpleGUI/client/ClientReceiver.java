@@ -50,6 +50,18 @@ public class ClientReceiver extends Thread {
 				SimpleGUIClient.getInstance().getUserListModel().clear();
 				SimpleGUIClient.getInstance().getUserListModel().addAll(usernameList);
 				break;
+				
+			case "exitUserList":
+				List<String> removeUsernameList = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				SimpleGUIClient.getInstance().getUserListModel().clear();
+				SimpleGUIClient.getInstance().getUserListModel().addAll(removeUsernameList);
+				break;
+				
+//			case "ownerExit":
+//				List<String> exitRoomList = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+//				SimpleGUIClient.getInstance().getUserListModel().clear();
+//				SimpleGUIClient.getInstance().getUserListModel().addAll(exitRoomList);
+//				break;
 		}
 	}
 }

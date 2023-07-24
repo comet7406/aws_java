@@ -60,7 +60,11 @@ public class ConnectedSocket extends Thread {
 				createRoom(requestBody);
 				break;
 				
-//			case "exit":
+			case "exit":
+				exit(requestBody);
+				break;
+				
+//			case "ownerExit":
 //				exit(requestBody);
 //				break;
 				
@@ -85,9 +89,11 @@ public class ConnectedSocket extends Thread {
 		
 		RequestBodyDto<List<String>> updateRoomListRequestBodyDto = 
 				new RequestBodyDto<List<String>>("updateRoomList", roomNameList);
-		
+
 			ServerSender.getInstance().send(socket, updateRoomListRequestBodyDto);
+			
 	}
+	
 	
 	private void createRoom(String requestBody) {
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
@@ -147,9 +153,63 @@ public class ConnectedSocket extends Thread {
 		
 	}
 	
-//	private void exit(String reuqestBody) {
-//		String chattingRoomPanel = (String) gson.fromJson(reuqestBody, RequestBodyDto.class).getBody();
-//			
+	private void exit(String reuqestBody) {
+		String exitRoom = (String) gson.fromJson(reuqestBody, RequestBodyDto.class).getBody();
+		
+		SimpleGUIServer.roomList.forEach(room -> {
+
+			if(room.getOwner().equals(exitRoom)) {
+				room.getUserList().removeAll(null);
+			}
+			
+				room.getUserList().remove(this);
+				
+				List<String> removeUsernameList = new ArrayList<>();
+				
+				room.getUserList().forEach(con -> {
+					removeUsernameList.add(con.username);
+				});
+				
+				room.getUserList().forEach(connectedSocket -> {
+					RequestBodyDto<List<String>> removerUserListDto = new RequestBodyDto<List<String>>("exitUserList", removeUsernameList);
+					RequestBodyDto<String> exitMessageDto = new RequestBodyDto<String>("showMessage", username + "님이 나갔습니다.");
+					
+					ServerSender.getInstance().send(connectedSocket.socket, removerUserListDto);
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					ServerSender.getInstance().send(connectedSocket.socket, exitMessageDto);
+				});
+
+		});
+			
+	}
+	
+//	private void ownerExit(String reuqestBody) {
+//		String ownerExitRoom = (String) gson.fromJson(reuqestBody, RequestBodyDto.class).getBody();
+//		
+//		SimpleGUIServer.roomList.forEach(room -> {
+//			if(room.getOwner().equals(ownerExitRoom)) {
+//				
+//				room.getUserList().remove(ownerExitRoom);
+//				
+//				room.getUserList().forEach(connectedSocket -> {
+//					RequestBodyDto<List<String>> exitRoomListDto = new RequestBodyDto<List<String>>("ownerExit", exitRoomList);
+//					
+//					ServerSender.getInstance().send(connectedSocket.socket, exitRoomListDto);
+//					try {
+//						Thread.sleep(100);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//					ServerSender.getInstance().send(connectedSocket.socket, joinMessageDto);
+//				});
+//			} 
+//		
+//		});
+//
 //	}
 	
 	private void sendMessage(String requestBody) {

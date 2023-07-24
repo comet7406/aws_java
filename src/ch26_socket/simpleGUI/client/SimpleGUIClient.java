@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -20,10 +21,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import ch26_socket.simpleGUI.client.dto.RequestBodyDto;
 import ch26_socket.simpleGUI.client.dto.SendMessage;
+import ch26_socket.simpleGUI.server.entity.Room;
 import lombok.Getter;
 @Getter
 public class SimpleGUIClient extends JFrame {
@@ -39,6 +43,8 @@ public class SimpleGUIClient extends JFrame {
 	private String username;
 	private Socket socket;
 	
+	private JTextField showUserName;
+	
 	private CardLayout mainCardLayout;
 	private JPanel mainCardPanel;
 
@@ -46,7 +52,11 @@ public class SimpleGUIClient extends JFrame {
 	private JScrollPane roomListScrollPanel;
 	private DefaultListModel<String> roomListModel;
 	private JList roomList;
+	private JPanel showUserNamePanel;
 	
+	
+	private JPanel roomTitlePanel;
+	private JTextField roomTitle;
 	
 	
 	private JPanel chattingRoomPanel;
@@ -56,7 +66,11 @@ public class SimpleGUIClient extends JFrame {
 	private DefaultListModel<String> userListModel;
 	private JList userList;
 	
-	private JButton deleteRoomButton;
+	private JButton exitRoomButton;
+	private JTextField textField;
+	private JPanel panel;
+	private JTextField textField_1;
+	protected String roomName;
 	
 	
 	
@@ -88,7 +102,8 @@ public class SimpleGUIClient extends JFrame {
 	
 	public SimpleGUIClient() {
 	
-		username = JOptionPane.showInputDialog(chattingRoomPanel, "아이디를 입력하세요.");			
+		username = JOptionPane.showInputDialog(chattingRoomPanel, "아이디를 입력하세요.");
+
 		
 		if(Objects.isNull(username)) {
 			System.exit(0);
@@ -140,14 +155,33 @@ public class SimpleGUIClient extends JFrame {
 						return;
 					}
 				}
+				
 				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("createRoom", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
 				mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
-				requestBodyDto = new RequestBodyDto<String>("exit", roomName);
+				requestBodyDto = new RequestBodyDto<String>("join", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
+				roomTitle.setText(roomName);
+				
+				
 			}
 		});
 		chattingRoomListPanel.add(createRoomButton);
+		
+		
+		showUserNamePanel = new JPanel();
+		showUserNamePanel.setBounds(323, 10, 100, 30);
+		showUserNamePanel.setLayout(null);
+		chattingRoomListPanel.add(showUserNamePanel);
+		
+		showUserName = new JTextField(username); // 접속자 이름 뜨게하기
+		showUserName.setBorder(null);
+		showUserName.setHorizontalAlignment(SwingConstants.CENTER);
+		showUserName.setBounds(0, 0, 100, 30);
+		showUserNamePanel.add(showUserName);
+		showUserName.setEditable(false);
+		
+
 		
 		roomListScrollPanel = new JScrollPane();
 		roomListScrollPanel.setBounds(10, 53, 414, 198);
@@ -161,39 +195,57 @@ public class SimpleGUIClient extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 2) {
 					String roomName = roomListModel.get(roomList.getSelectedIndex());
-					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
 					ClientSender.getInstance().send(requestBodyDto);
+					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
+
+					roomTitle.setText(roomName);
 				}
 			}
 		});
 		roomListScrollPanel.setViewportView(roomList);
-		
-		
-		
-		
+
 		
 		chattingRoomPanel = new JPanel();
 		chattingRoomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		chattingRoomPanel.setLayout(null);
 		mainCardPanel.add(chattingRoomPanel, "chattingRoomPanel");
 		
+
 		
-		JButton deleteRoomButton = new JButton("방나가기");
-		deleteRoomButton.setBounds(294, 12, 128, 28);
-		deleteRoomButton.addMouseListener(new MouseAdapter() {
+		roomTitlePanel = new JPanel();
+		roomTitlePanel.setBounds(12, 12, 270, 28);
+		roomTitlePanel.setLayout(null);
+		chattingRoomPanel.add(roomTitlePanel);
+		
+		roomTitle = new JTextField(roomName);
+		roomTitle.setBorder(null);
+		roomTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		roomTitle.setBounds(0, 0, 270, 28);
+		roomTitle.setEditable(false);
+		roomTitle.setColumns(10);
+		roomTitlePanel.add(roomTitle);
+	
+		
+		
+		JButton exitRoomButton = new JButton("방나가기");
+		exitRoomButton.setBounds(294, 12, 128, 28);
+		exitRoomButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exit", "");
+				
+				String exitRoom = roomListModel.remove(roomList.getSelectedIndex());
+				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exit", exitRoom);
 				ClientSender.getInstance().send(requestBodyDto);
 				mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
 
 			}
 		});
-		chattingRoomPanel.add(deleteRoomButton);
+		
+		chattingRoomPanel.add(exitRoomButton);
 		
 		JScrollPane chattingTextAreaScrollPanel = new JScrollPane();
-		chattingTextAreaScrollPanel.setBounds(12, 10, 270, 203);
+		chattingTextAreaScrollPanel.setBounds(12, 50, 270, 163);
 		chattingRoomPanel.add(chattingTextAreaScrollPanel);
 		
 	
@@ -230,6 +282,10 @@ public class SimpleGUIClient extends JFrame {
 		userListModel = new DefaultListModel<>();
 		userList = new JList(userListModel);
 		userListScrollPane.setViewportView(userList);
+		
+
+		
+
 		
 		
 		
